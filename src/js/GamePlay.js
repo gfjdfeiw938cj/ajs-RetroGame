@@ -64,12 +64,12 @@ export default class GamePlay {
     for (let i = 0; i < this.boardSize ** 2; i += 1) {
       const cellEl = document.createElement('div');
       cellEl.classList.add('cell', 'map-tile', `map-tile-${calcTileType(i, this.boardSize)}`);
-      cellEl.addEventListener('mouseenter', (event) => this.onCellEnter(event));
-      cellEl.addEventListener('mouseleave', (event) => this.onCellLeave(event));
+      cellEl.addEventListener('mouseenter', (event) => this.onCellEnter(event)); //Привязываем события mouseenter при наведении курсора на элемент для всех 63 клеток карты 
+      cellEl.addEventListener('mouseleave', (event) => this.onCellLeave(event)); //Привязываем события mouseleave при покидания курсора с элемент для всех 63 клеток карты 
       cellEl.addEventListener('click', (event) => this.onCellClick(event));
       this.boardEl.appendChild(cellEl);
     }
-
+     
     this.cells = Array.from(this.boardEl.children);
   }
 
@@ -79,109 +79,100 @@ export default class GamePlay {
    * @param positions array of PositionedCharacter objects
    */
   redrawPositions(positions) {
-    for (const cell of this.cells) {
+    for (const cell of this.cells) { // Добавляем к каждому дом элементу пустую строку <div class="cell map-tile map-tile-top-left">''</div>
       cell.innerHTML = '';
     }
 
     for (const position of positions) {
-      const cellEl = this.boardEl.children[position.position];
+      const cellEl = this.boardEl.children[position.position]; //из обьета positions берем позицию игрока где он должен быть на карте и возрашаем элемент Dom 
       const charEl = document.createElement('div');
-      charEl.classList.add('character', position.character.type);
+      charEl.classList.add('character', position.character.type); //Добавляем классы к эементу cellEl 'character' и имя класса игры 
 
       const healthEl = document.createElement('div');
       healthEl.classList.add('health-level');
 
       const healthIndicatorEl = document.createElement('div');
-      healthIndicatorEl.classList.add('health-level-indicator', `health-level-indicator-${calcHealthLevel(position.character.health)}`);
-      healthIndicatorEl.style.width = `${position.character.health}%`;
-      healthEl.appendChild(healthIndicatorEl);
+      healthIndicatorEl.classList.add('health-level-indicator', `health-level-indicator-${calcHealthLevel(position.character.health)}`); // передаем свойсво здоровье в функцию calcHealthLevel() и возрашам индикатор здоровье у героя
+      healthIndicatorEl.style.width = `${position.character.health}%`; //Добавляем в атрибут style свойсвто width в % отнош. состояние жизни героя 
+      healthEl.appendChild(healthIndicatorEl); 
 
       charEl.appendChild(healthEl);
       cellEl.appendChild(charEl);
+      //                                                       Создаем такую структуру 
+      //<div class="cell map-tile map-tile-left">
+      //   <div class="character bowman">
+      //      <div class="health-level">
+      //          <div class="health-level-indicator health-level-indicator-high" style="width: 100%;">
+      //      </div>
+      //   </div>
+      //</div>
+  
     }
   }
 
-  /**
-   * Add listener to mouse enter for cell
-   *
-   * @param callback
-   */
+  // Добавляет функцию обработки события в массив. Функция для События "mouseenter" применяется для каждой из 63 ячеек игрового поля. 
   addCellEnterListener(callback) {
     this.cellEnterListeners.push(callback);
   }
 
-  /**
-   * Add listener to mouse leave for cell
-   *
-   * @param callback
-   */
+ // Добавляет функцию обработки события в массив. Функция для События "mouseleave" применяется для каждой из 63 ячеек  игрового поля. 
   addCellLeaveListener(callback) {
     this.cellLeaveListeners.push(callback);
   }
 
-  /**
-   * Add listener to mouse click for cell
-   *
-   * @param callback
-   */
+ // Добавляет функцию обработки события в массив. Функция для События "сlick" применяется для каждой из 63 ячеек игрового поля.
   addCellClickListener(callback) {
     this.cellClickListeners.push(callback);
   }
 
-  /**
-   * Add listener to "New Game" button click
-   *
-   * @param callback
-   */
+ // Добавляет функцию обработки события в массив. Функция для События "сlick" по кнопки NewGame
   addNewGameListener(callback) {
     this.newGameListeners.push(callback);
   }
 
-  /**
-   * Add listener to "Save Game" button click
-   *
-   * @param callback
-   */
+ // Добавляет функцию обработки события в массив. Функция для События "сlick" по кнопки SaveGame
   addSaveGameListener(callback) {
     this.saveGameListeners.push(callback);
   }
 
-  /**
-   * Add listener to "Load Game" button click
-   *
-   * @param callback
-   */
+ // Добавляет функцию обработки события в массив. Функция для События "сlick" по кнопки LoadGame
   addLoadGameListener(callback) {
     this.loadGameListeners.push(callback);
   }
 
+  //Вынесенная функция для снегерированного События "mouseenter" при наведении курсора на элемент
   onCellEnter(event) {
     event.preventDefault();
-    const index = this.cells.indexOf(event.currentTarget);
-    this.cellEnterListeners.forEach((o) => o.call(null, index));
+    const index = this.cells.indexOf(event.currentTarget); // Определяем номер ячейки грового поля
+    this.cellEnterListeners.forEach((o) => o.call(null, index)); //Передаем номер ячейки грового поля в колбэк функцию
   }
 
+ //Вынесенная функция для снегерированного События "mouseleave" при покидания курсора с элемента
   onCellLeave(event) {
     event.preventDefault();
-    const index = this.cells.indexOf(event.currentTarget);
-    this.cellLeaveListeners.forEach((o) => o.call(null, index));
+    const index = this.cells.indexOf(event.currentTarget); // Определяем номер ячейки грового поля
+    this.cellLeaveListeners.forEach((o) => o.call(null, index)); // Передаем номер ячейки грового поля в колбэк функцию
   }
 
+  //Вынесенная функция для снегерированного События "Click" на нажатия на элемент 
   onCellClick(event) {
-    const index = this.cells.indexOf(event.currentTarget);
-    this.cellClickListeners.forEach((o) => o.call(null, index));
+    const index = this.cells.indexOf(event.currentTarget); // Определяем номер ячейки грового поля
+    this.cellClickListeners.forEach((o) => o.call(null, index)); // Передаем номер ячейки грового поля в колбэк функцию
   }
 
+  //Вынесенная функция для снегерированного События "Click" при нажатие кнопки NewGame(начать новую игру)
   onNewGameClick(event) {
     event.preventDefault();
     this.newGameListeners.forEach((o) => o.call(null));
   }
 
+  //Вынесенная функция для снегерированного События "Click" при нажатие кнопки SaveGame(сохранить игру)
   onSaveGameClick(event) {
     event.preventDefault();
     this.saveGameListeners.forEach((o) => o.call(null));
   }
 
+  //Вынесенная функция для снегерированного События "Click" при нажатие кнопки LoadGame(загрузить игру)
   onLoadGameClick(event) {
     event.preventDefault();
     this.loadGameListeners.forEach((o) => o.call(null));
@@ -195,21 +186,24 @@ export default class GamePlay {
     alert(message);
   }
 
-  selectCell(index, color = 'yellow') {
+  selectCell(index, color = 'yellow') { // Меняем подсветку на игр. поле
     this.deselectCell(index);
     this.cells[index].classList.add('selected', `selected-${color}`);
   }
 
-  deselectCell(index) {
+  //Удаляем из выбранного элемента класс 'selected' котороый указывает подсвеченого игрока и поля для хода(желтого и зеленрого цвета) и проверяем есть ли в списке классов у каждого элемента в начале строки строка "selected" 
+  deselectCell(index) {  
     const cell = this.cells[index];
     cell.classList.remove(...Array.from(cell.classList)
       .filter((o) => o.startsWith('selected')));
   }
 
+ // Записываем в Атрибут title на message (message это сплывающее окно по наведению с информацией о персонаже "пример(🎖 1 ⚔ 25 🛡 25 ❤ 100)")
   showCellTooltip(message, index) {
     this.cells[index].title = message;
   }
 
+  //Убираем сплывающие окно "пример(🎖 1 ⚔ 25 🛡 25 ❤ 100)". Атрибуте title задает всплывающую подсказку для элемента, которая будет появляться по наведению мышкой на элемент
   hideCellTooltip(index) {
     this.cells[index].title = '';
   }
@@ -228,13 +222,14 @@ export default class GamePlay {
     });
   }
 
+  //Меня вид курсора мыши 
   setCursor(cursor) {
     this.boardEl.style.cursor = cursor;
   }
 
   checkBinding() {
     if (this.container === null) {
-      throw new Error('GamePlay not bind to DOM');
+      throw new Error('GamePlay not bind to DOM'); // нет свойства this.container(Игровой процесс не привязан к DOM)
     }
   }
 

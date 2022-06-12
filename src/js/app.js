@@ -11,5 +11,5 @@ gamePlay.bindPopup(document.querySelector('#popup'));
 
 const stateService = new GameStateService(localStorage);
 
-const gameCtrl = new GameController(gamePlay, stateService);
+const gameCtrl = new GameController(gamePlay, stateService); // В качесве аргумента два класса 
 gameCtrl.init();

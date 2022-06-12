@@ -9,7 +9,7 @@ export default class GameStateService {
 
   load() {
     try {
-      return JSON.parse(this.storage.getItem('state'));
+      return JSON.parse(this.storage.getItem('state')); //Извлекаем из локального хранилища данные с сохраненной игрой и преобразуем из строки в obj
     } catch (e) {
       throw new Error('Invalid state');
     }

@@ -7,7 +7,6 @@ export default class Character {
     this.player = player; // Тип игрока 'user' или 'computer'
     this.stepsRadius = stepsRadius; // Доступный радиус хода в клетках
     this.attackRadius = attackRadius; // Доступный радиус атаки в клетках
-
     // TODO: throw error if user use "new Character()"
     if (new.target.name === 'Character') {
       throw new Error('Запрещено создавать объекты базового класса Character!');

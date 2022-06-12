@@ -28,7 +28,7 @@ export function generateTeam(allowedTypes, maxLevel, characterCount) {
  * @param {*} player - Игрок 'user' или 'computer'
  * @returns номер поля :number
  */
-export function startFieldGenerator(player) {
+ export function startFieldGenerator(player, arr) {
   const boardSize = 8;
   const cellsCount = boardSize ** 2 - 1;
   const validateCells = [];
@@ -36,12 +36,17 @@ export function startFieldGenerator(player) {
   for (let i = startCell; i <= cellsCount; i += boardSize) {
     validateCells.push(i, i + 1);
   }
-
-  // Для случайного номера ячейки
   const randomIndex = Math.floor(Math.random() * validateCells.length);
-  return validateCells[randomIndex];
+  if (arr.some((el) => el == validateCells[randomIndex])) {
+    return startFieldGenerator(player, arr);
+  } else {
+    arr.push(validateCells[randomIndex]);
+    return validateCells[randomIndex];
+  }
 }
 
+// Для случайного номера ячейки
+ 
 /**
  * Генерирует массив возможных вариантов хода
  * @param {number} index - Текущее положение
@@ -108,7 +113,8 @@ export function getAvailableDistance(index, radius) {
     allowableSteps.add(i);
     if (i % 8 === 0 || (i + 7) >= 64) break;
   }
-  return [...allowableSteps].filter((num) => num !== index);
+
+  return [...allowableSteps].filter((num) => num !== index); // Избавляемся от клетки игрового поля на которой стоит герой
 }
 
 /**

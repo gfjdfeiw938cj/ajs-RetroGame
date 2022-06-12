@@ -4,12 +4,12 @@ import cursors from './cursors';
 import side from './side';
 import GameState from './GameState';
 import PositionedCharacter from './PositionedCharacter';
-import Bowman from './Heroes/Bowman';
-import Daemon from './Heroes/Daemon';
-import Magician from './Heroes/Magician';
-import Swordsman from './Heroes/Swordsman';
-import Undead from './Heroes/Undead';
-import Vampire from './Heroes/Vampire';
+import Bowman from './heroesСonstantsGame/Bowman';
+import Daemon from './heroesСonstantsGame/Daemon';
+import Magician from './heroesСonstantsGame/Magician';
+import Swordsman from './heroesСonstantsGame/Swordsman';
+import Undead from './heroesСonstantsGame/Undead';
+import Vampire from './heroesСonstantsGame/Vampire';
 import {
   generateTeam,
   startFieldGenerator,
@@ -54,24 +54,25 @@ export default class GameController {
    * @returns -
    */
   onCellClick(index) {
-    // TODO: react to click
+   // Находим из всех созданных obj инф. о персонажей игры записаный в (this.gameState.teams) того которого мы выбрали.
     const hero = this.gameState.teams.find((elem) => elem.position === index);
-    if (hero && hero.character.player === side.USER) {
-      if (this.gameState.selectedHero) this.gamePlay.deselectCell(this.gameState.selectedHero.position);
-      this.gamePlay.selectCell(index);
-      this.gameState.availableSteps = getAvailableDistance(index, hero.character.stepsRadius);
-      this.gameState.availableAttack = getAvailableAttack(index, hero.character.attackRadius);
-      this.gameState.selectedHero = hero;
+    if (hero && hero.character.player === side.USER) { // Проверяем нажали на гереоя и ходит ли игрок или компьютер 
+      //Для игрока 
+      if (this.gameState.selectedHero) this.gamePlay.deselectCell(this.gameState.selectedHero.position); // Проверяем выбран ли персонаж (подсвеченый желтым цветом) по нажатию на его мыши 
+      this.gamePlay.selectCell(index); // Метод подсвечивает игрока желтым цветом на игровом поле 
+      this.gameState.availableSteps = getAvailableDistance(index, hero.character.stepsRadius); // Определяется зона по которому игрок может ходить по игровому полю, за 1 ход. Возрашает номера ячеек зоны.
+      this.gameState.availableAttack = getAvailableAttack(index, hero.character.attackRadius); // Определяется дистанция атаки игрока 
+      this.gameState.selectedHero = hero; // Сохраняем или пересохраняем факт выбора героя (подсвеченый желтым цветом) при нажатии на него. 
       return;
     }
 
     // Ход. Клик в пустое поле
     if (this.gameState.selectedHero) {
-      // Если поле есть в допустимых значениях и в нем нет героя
+      // Выбранная ячейка входит в допуск зоны перемешения героя и в нем нет героя
       if (this.gameState.availableSteps.includes(index) && !hero) {
-        this.gamePlay.deselectCell(this.gameState.selectedHero.position);
-        this.gameState.selectedHero.position = index;
-        this.gamePlay.deselectCell(index);
+        this.gamePlay.deselectCell(this.gameState.selectedHero.position); // Удаляем подсветку желтого цвета изображенную на игроке и подсветку зеленого цвета куда игрок будет ходить.
+        this.gameState.selectedHero.position = index; // Меняем позицию игрока на игровом поле. Куда переместится иконка игрока на поле. 
+        this.gamePlay.deselectCell(index);// Удаляем подсветку зеленного цвета.
         // Проверка окончания уровня и передача хода
         this.checkLevel();
       }
@@ -103,9 +104,9 @@ export default class GameController {
    * @param {*} index - индекс ячейки
    */
   onCellLeave(index) {
-    // TODO: react to mouse leave
+    // Убираем сплывающие окно "пример(🎖 1 ⚔ 25 🛡 25 ❤ 100)
     this.gamePlay.hideCellTooltip(index);
-    // Чтобы не убиралось выделение активного игрока
+    // Условие проверяет если выбраный герой (герой подсвеченный желтым цветом) не сходил то подсветка остается на своем месте до тех пор пока герой не сходит.
     if (this.gameState.selectedHero && (this.gameState.selectedHero.position !== index)) {
       this.gamePlay.deselectCell(index);
     }
@@ -116,17 +117,17 @@ export default class GameController {
    * @param {*} index - индекс ячейки
    */
   onCellEnter(index) {
-    // Проверяем наличие персонажа в ячейке поля
+    // Сравнивает из списка obj инф о героях их позицию с реальной позицией на игр. поле. Если есть на этой ячеки игр. поля героя то возрашем obj инф о герое
     const hero = this.gameState.teams.find((elem) => elem.position === index);
-
-    if (hero) {
+    
+    if (hero) { //Если герой есть на ячейки то создаём всплывающее окно по наведению с информацией о персонаже "пример(🎖 1 ⚔ 25 🛡 25 ❤ 100)" и номер клетки игрового поля в showCellTooltip
       const toolTip = this.constructor.createToolTipTemplate.call(this, hero);
       this.gamePlay.showCellTooltip(toolTip, index);
     }
     // Меняем тип курсора,если нет выбранного персонажа
     this.activeCursor(hero);
 
-    // Изменение типа курсора и подсветка ячейки хода/атаки при выбранном персонаже
+    // Проверяем был ли выбран персонаж(выбранный персонаж обзн. желтым цветом) на игр. поле. Если да то возле героя по наведению на ячейку игр. поля посвечивается область дальнейшего его хода.  
     if (this.gameState.selectedHero) {
       this.activeCursorSelectedHero(index, hero);
     }
@@ -153,10 +154,10 @@ export default class GameController {
    */
   activeCursor(hero) {
     if (hero) {
-      const pointer = hero.character.player === side.USER ? cursors.pointer : cursors.notallowed;
-      this.gamePlay.setCursor(pointer);
+      const pointer = hero.character.player === side.USER ? cursors.pointer : cursors.notallowed; // Условие которое проверяет какой тип курсора нужно изменить, если навели на игрока то pointer, если на противника то notallowed
+      this.gamePlay.setCursor(pointer); //Активация одного из игровых курсоров.
     } else {
-      this.gamePlay.setCursor(cursors.auto);
+      this.gamePlay.setCursor(cursors.auto); // Курсор остается без изменений (стандартный курсор)
     }
   }
 
@@ -166,9 +167,9 @@ export default class GameController {
    * @param {*} hero - объект с характеристиками персонажа
    */
   activeCursorSelectedHero(index, hero) {
-    if (this.gameState.availableSteps.includes(index) && !hero) {
-      this.gamePlay.setCursor(cursors.pointer);
-      this.gamePlay.selectCell(index, 'green');
+    if (this.gameState.availableSteps.includes(index) && !hero) { //Проверяем если выбранная клетка игрового поля входит в область возможного хода игрока и на наличие сушности игрок или ИИ или пустое место в этой клетки. 
+      this.gamePlay.setCursor(cursors.pointer); // меняем тип курсора на 'pointer'
+      this.gamePlay.selectCell(index, 'green'); // Подсвечивает выбранную клетку зеленный цветом на которую может пойти игрок. (курсор ввиде зеленого круга вписаного в клетку игр. поля)
     } else if (hero && hero.character.player === side.COMP && this.gameState.availableAttack.includes(index)) {
       this.gamePlay.setCursor(cursors.crosshair);
       this.gamePlay.selectCell(index, 'red');
@@ -197,11 +198,11 @@ export default class GameController {
       this.checkCell();
     }
     try {
-      const load = this.stateService.load();
+      const load = this.stateService.load(); //Возвращаем Obj извлеченного из локального хранилища сохраненой туда данных с игрой  
       if (load) {
-        this.gameState = GameState.from(load);
-        this.gamePlay.drawUi(Object.values(themes)[this.gameState.stage - 1]);
-        this.gamePlay.redrawPositions(this.gameState.teams);
+        this.gameState = GameState.from(load); //Перезаписываем load и возрашаем актуальное состояние игры и возрашаем this.gameState(Obj)
+        this.gamePlay.drawUi(Object.values(themes)[this.gameState.stage - 1]); //Получаем массив из 63 ячеек игрового поля записав их в GamePlay.this.cells и childNodes:(псевдо массив) GamePlay.this.boardEl
+        this.gamePlay.redrawPositions(this.gameState.teams); //После этого метода появляется на экр. карта с игроками 
       } else {
         this.newGame();
       }
@@ -229,10 +230,10 @@ export default class GameController {
    * Переход хода
    */
   nextPlayer() {
-    this.gameState.motion = (this.gameState.motion === side.USER) ? side.COMP : side.USER;
+    this.gameState.motion = (this.gameState.motion === side.USER) ? side.COMP : side.USER; // Определяет кто ходит человек или компьютер
     // console.log('Ход переходит к:', this.gameState.motion);
     if (this.gameState.motion === side.COMP) {
-      this.computerLogic();
+      this.computerLogic(); // Логика хода и атаки компьютера
     }
     this.gameState.clear();
   }
@@ -241,16 +242,16 @@ export default class GameController {
    * Проверка окончания уровня
    */
   checkLevel() {
-    const userValue = this.gameState.teams.some((member) => member.character.player === side.USER);
-    const computerValue = this.gameState.teams.some((member) => member.character.player === side.COMP);
+    const userValue = this.gameState.teams.some((member) => member.character.player === side.USER);// Проверяем если это герой в списки пользователя  возрашаем логич знач.
+    const computerValue = this.gameState.teams.some((member) => member.character.player === side.COMP);//  Проверяем если это герой в списки компьютера(ИИ) возрашаем логич знач.
     if (userValue && computerValue) {
-      this.nextPlayer();
+      this.nextPlayer(); //  Передача хода. Если ходит компьютер(ИИ) то генерируем логику дейсвий компьютер(ИИ). После передачи хода игроку удаляем значения область атаки, область хода героя.  
       return;
     }
     if (!computerValue) {
-      this.gameState.clear();
-      this.gameState.addScores();
-      this.nextStage(this.gameState.stage += 1);
+      this.gameState.clear(); // Очищает значение доступных шагов и атаки
+      this.gameState.addScores(); // Считает и добавляет очки за раунд
+      this.nextStage(this.gameState.stage += 1); 
     }
     if (!userValue) {
       // GamePlay.showMessage('Враг оказался хитрее и сильнее(((');
@@ -329,26 +330,27 @@ export default class GameController {
    */
   computerLogic() {
     const { teams } = this.gameState;
-    const computerTeams = teams.filter((member) => member.character.player === side.COMP);
-    const userTeams = teams.filter((member) => member.character.player === side.USER);
+    const computerTeams = teams.filter((member) => member.character.player === side.COMP); // отсоритруем героев компьютера(ИИ)
+    const userTeams = teams.filter((member) => member.character.player === side.USER);// отсоритруем героев игрока
+    const arr2 = teams.map((el) => el.position);
     // Проверяем возможность атаки
     const attack = computerTeams.some((compUnit) => {
-      this.gameState.availableAttack = getAvailableAttack(compUnit.position, compUnit.character.attackRadius);
-      const attacked = userTeams.find((userUnit) => this.gameState.availableAttack.includes(userUnit.position));
+      this.gameState.availableAttack = getAvailableAttack(compUnit.position, compUnit.character.attackRadius); // Определяем зону атаки компьютеров(ИИ) 
+      const attacked = userTeams.find((userUnit) => this.gameState.availableAttack.includes(userUnit.position)); // Определяем находится ли игрок в зоне поражения атаки компьютера(ИИ) 
       if (attacked) {
-        this.attack(attacked, compUnit, attacked.position);
-        return true;
+        this.attack(attacked, compUnit, attacked.position); // 
+        return true; // Если игрок находится в зоне поражения атаки компьютера(ИИ) возвращаем true
       }
-      return false;
+      return false; // Если нет то возвращаем false
     });
     // Ход computer
-    if (!attack && computerTeams.length && userTeams.length) {
-      const unit = Math.floor(Math.random() * computerTeams.length);
-      const steps = getAvailableDistance(computerTeams[unit].position, computerTeams[unit].character.stepsRadius);
-      const step = Math.floor(Math.random() * steps.length);
-      computerTeams[unit].position = steps[step];
-      this.checkLevel();
-      this.gamePlay.redrawPositions(this.gameState.teams);
+    if (!attack && computerTeams.length && userTeams.length) { // Условие если компьютер(ИИ) не может атаковать и если живые герои компьютер(ИИ) и живые герои Игрока
+      const unit = Math.floor(Math.random() * computerTeams.length); // Кто будет ходить из героев компьютера(ИИ) (Случайно генерируется номер героя компьютера(ИИ) который будет ходить)
+      const steps = getAvailableDistance(computerTeams[unit].position, computerTeams[unit].character.stepsRadius).filter((x) => teams.map((el) => el.position).indexOf(x) < 0); // Определим зону доступного для шага компьютера(ИИ) по игр. карте 
+      const step = Math.floor(Math.random() * steps.length); // Рэндомного получаем индекс из массива для выбора его в качесве компьютера(ИИ)
+      computerTeams[unit].position = steps[step]; // Определяем на какую клетку будет ходить компьютер. Выбор осуществляется из массива доступных для компьютера(ИИ) ячеек перемещения. Возращаем индекс для массива steps
+      this.checkLevel(); // Проверка окончания уровня и стирает массив с зоной доступного для шага компьютера(ИИ) и зоной атаки компьютеров(ИИ)
+      this.gamePlay.redrawPositions(this.gameState.teams); // Отрисовка героев на игр. карте героев.
     }
   }
 
@@ -356,13 +358,15 @@ export default class GameController {
    * Повышает уровень членов команды
    */
   static levelUp() {
+    let arr = [];
     for (const member of this.gameState.teams) {
       const parameter = member.character;
-      member.position = startFieldGenerator(side.USER); // Возвращаем игроков с свои поля
+      member.position = startFieldGenerator(side.USER, arr); // Раставляем случайно героев в ячеки игрового поля  
       parameter.level += 1;
-      parameter.health = parameter.health + 80 >= 100 ? 100 : parameter.health + 80;
+      parameter.health = parameter.health + 80 >= 100 ? 100 : parameter.health + 80; // Прибавляем здоровь зависимости от того на сколько мы его потеряли в прошлой игре
       parameter.attack = Math.floor(Math.max(parameter.attack, parameter.attack * (0.8 + parameter.health / 100)));
     }
+    arr = [];
   }
 
   /**
@@ -380,17 +384,15 @@ export default class GameController {
       this.gameState.teams.forEach((elem) => positionList.push(elem.position));
     }
     // Добавляем позиции новым персонажам
+    let arr = []
     newTeam = newTeam.toArray.reduce((acc, member) => {
       // Случайная позиция персонажа из списка доступных
-      let randomNumber = startFieldGenerator(prayer);
-      // Если есть такая позиция уже есть генерируем новую
-      while (positionList.includes(randomNumber)) {
-        randomNumber = startFieldGenerator(prayer);
-      }
+      let randomNumber = startFieldGenerator(prayer, arr);
       positionList.push(randomNumber);
       acc.push(new PositionedCharacter(member, randomNumber));
       return acc;
     }, []);
+    arr = []
     this.gameState.teams.push(...newTeam);
   }
 

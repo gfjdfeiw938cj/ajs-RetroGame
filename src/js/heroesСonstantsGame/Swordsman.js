@@ -1,19 +1,18 @@
 import Character from '../Character';
 import heroesConfig from '../heroesCharacteristic';
+import side from '../side';
 
 export default class Swordsman extends Character {
   constructor(level) {
-    const {
-      type,
+    const targetClassName = new.target.name;
+    let {
       attack,
       defence,
-      player,
       stepsRadius,
       attackRadius,
-    } = heroesConfig[new.target.name];
-
+    } = heroesConfig[side.USER][targetClassName];
+    let player = side.USER;
     super(level, attack, defence, player, stepsRadius, attackRadius);
-
-    this.type = type;
+    super.type = targetClassName.toLowerCase();
   }
 }

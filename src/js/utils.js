@@ -21,8 +21,8 @@ export function calcTileType(index, boardSize) {
   }
 }
 
-export function calcHealthLevel(health) {
-  if (health < 15) {
+export function calcHealthLevel(health) { 
+  if (health < 15) {    //Проверяем сотояние здоровье у героя (  критическое  меньше 15, нормальное меньше 50, все выше высокое )
     return 'critical';
   }
 
